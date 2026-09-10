@@ -23,6 +23,7 @@ create dynamic projects / boards / workflows / columns without re-discovering th
 
 > **New to Hermes?** Read **[docs/install-to-hermes.md](docs/install-to-hermes.md)** for step-by-step
 > instructions on loading these skills into a fresh Hermes agent (Hebrew).
+> **Real worked examples:** see **[docs/examples.md](docs/examples.md)** (Server Dashboard + Kafka Investigation boards).
 
 1. **User describes a business need** (e.g. "a server-management web app").
 2. Follow `skills/jira-dynamic-workflow/SKILL.md` — analyze → propose → **get approval** → execute.
@@ -93,8 +94,8 @@ skills/
   jira-cloud-boards/    SKILL.md + scripts (create_workflow.py, setup_team_board.py, set_columns.py)
   jira-dynamic-workflow/ SKILL.md (the agent role)
   jira-cloud-api/       SKILL.md (general REST automation)
-scripts/               copies of the ready-to-run Python scripts
-docs/                  detailed endpoint reference
+scripts/               ready-to-run Python scripts (incl. setup_kafka_board.py example)
+docs/                  endpoint reference + install guide + worked examples
 ```
 
 See `docs/endpoints.md` for the full endpoint/payload reference.
