@@ -104,21 +104,62 @@ This is MANDATORY, even when the task looks "simple".
 - If some answers affect the chosen persona/workflow itself (e.g. "this isn't just Kafka, it's a
   cross-service failure") — re-confirm with the user that the chosen board still fits, BEFORE creating the issue.
 
-## Step 6 — Approval before creating
+## Step 6 — Split into Subtasks by persona (parallel vs serial)
+Until now every request created ONE issue that moves serially through statuses (New → ... → Closed).
+That's correct when stages depend on each other, but sometimes a task has several INDEPENDENT parts that
+can/should run in parallel — then split into subtasks instead of cramming everything into one description.
+
+**When to split (after Planning):** are there at least two independent parts requiring substantively
+different knowledge/persona, with NO hard dependency between them for execution?
+- Yes → split into subtasks (structure below).
+- No, it's a single serial stream (stage must finish before next) → one normal issue, as before.
+  This is still the common case — don't force a split.
+
+**Don't over-split:** only split when it gives real value (separate tracking, actual parallel work).
+Don't break a small task into crumbs just because it's technically possible. If in doubt — ASK the user:
+"יש כאן כמה חלקים שיכולים לרוץ במקביל ({brief}) — לפצל ל-subtasks נפרדים, או להשאיר כ-issue אחד?"
+
+**Structure in Jira: Parent Issue + Subtasks**
+- The original issue stays as ONE parent issue (holds the general context).
+- Each independent part becomes a **subtask** under the parent (issue type = Sub-task).
+- Each subtask gets:
+  - a persona/role — via Assignee if there's a concrete person, or via label/component if still
+    planning (e.g. `persona:backend-developer`, `persona:security-review`).
+  - its own status from the same workflow (or a relevant subset).
+  - a focused description: only the part relevant to it from the Planning info.
+
+**Example — dev task with parallel parts:**
+- Parent: "פיתוח מודול ניהול שרתים"
+  - Subtask 1 → persona Backend Developer → "בניית API ל-CRUD שרתים"
+  - Subtask 2 → persona Frontend Developer → "בניית דשבורד תצוגה" (parallel to 1 if API contract agreed)
+  - Subtask 3 → persona Security Review → depends on 1+2, stays serial after them
+
+**Example — incident with parallel parts:**
+- Parent: "חקירת RabbitMQ lag"
+  - Subtask 1 → "בדיקת לוגים שרת production-3"
+  - Subtask 2 → "בדיקת לוגים שרת production-7" (parallel, converge at shared Root Cause)
+
+**What NOT to do:**
+- Don't create fully disconnected issues (no parent-subtask link) — loses shared context.
+- Don't split a serial stream into subtasks just to "look tidy" — if step B must wait for A, keep it
+  as internal description in one issue/subtask.
+- Don't decide alone when in doubt — ask the user.
+
+## Step 7 — Approval before creating
 Before opening a new project/board/workflow in Jira, present a short summary:
 - Proposed project name
 - List of statuses/stages
 - List of roles (personas) that will appear on the board
 Then ask explicit approval: "לאשר יצירה עם המבנה הזה?" Only after approval → proceed to technical execution.
 
-## Step 7 — Technical execution in Jira
+## Step 8 — Technical execution in Jira
 - Use the **`jira-cloud-boards`** skill for creating boards/workflows/statuses, INCLUDING the critical `location` parameter (learned from broken boards 34/101 — always ensure a valid location before finishing).
 - Use the **`jira-cloud-api`** skill for general operations (projects, schemes, assignments).
 - Use `scripts/setup_team_board.py` (from jira-cloud-boards) as the base, and adapt the status/workflow parameters to what was agreed with the user in Step 5.
 - After creating the board, **split the columns automatically** (no manual step) using `scripts/set_columns.py <boardId> "ColName:StatusId" ...` from jira-cloud-boards — this uses the undocumented greenhopper API and verifies via re-GET.
 - At the end verify: the board renders correctly, has a valid `location`, and ALL agreed statuses appear as their own columns.
 
-## Step 8 — Completion report
+## Step 9 — Completion report
 At the end report to the user:
 - Direct link to the new board
 - List of created statuses
