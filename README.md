@@ -21,6 +21,9 @@ create dynamic projects / boards / workflows / columns without re-discovering th
 
 ## 🚀 Quick start for a new agent
 
+> **New to Hermes?** Read **[docs/install-to-hermes.md](docs/install-to-hermes.md)** for step-by-step
+> instructions on loading these skills into a fresh Hermes agent (Hebrew).
+
 1. **User describes a business need** (e.g. "a server-management web app").
 2. Follow `skills/jira-dynamic-workflow/SKILL.md` — analyze → propose → **get approval** → execute.
 3. Execute with the scripts below.
