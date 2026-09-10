@@ -49,21 +49,46 @@ Use as a reasoning base, but ALWAYS adapt to the user's actual details:
 
 IMPORTANT: this is only a starting point. If the user has a different process — THEIR process wins.
 
-## Step 4 — Approval before creating
+## Step 4 — Check for an existing board FIRST (before creating anything)
+The agent used to create a brand-new project+board for every request, even small one-off ones
+(e.g. a single Kafka issue investigation) — causing project sprawl. FIX: before ANY creation
+(API/project/workflow), STOP and check for a suitable existing board.
+
+1. **Search existing boards/projects** (the agent already has API access): scan the current
+   projects/boards and check whether any board's workflow/category is substantively close to the
+   new request. E.g. a "production incident" request → check if a Support/Incident board already exists.
+2. **If a close board is found — ASK the user, never decide alone.** Present a clear two-option
+   question and WAIT for an explicit answer:
+   - "מצאתי board קיים ({project/board name}) שנראה מתאים. איך תרצה להמשיך?"
+     - א) להשתמש ב-board הקיים ולהוסיף את זה כ-issue חדש בתוכו
+     - ב) זה פרויקט גדול/חדש בפני עצמו — ליצור board נפרד ייעודי
+   The agent may add a short recommendation (e.g. "אני ממליץ להשתמש בקיים כי זו תקלה נקודתית"),
+   but the FINAL decision is always the user's.
+3. **Act on the choice:**
+   - User chose "use existing" → create a new ISSUE in the existing board (title, description,
+     initial status). Do NOT touch the existing workflow/project structure.
+   - User chose "new project" → continue the normal dynamic-workflow process (analysis → approval → create → split columns).
+4. **If NO close board exists** (entirely new category) → proceed directly to the normal dynamic
+   workflow creation, WITHOUT asking this question (nothing to compare against).
+
+GOLDEN RULE: never decide between "use existing" vs "create new" yourself when a reasonable match
+exists — always ask the user. You may recommend, but the user decides.
+
+## Step 5 — Approval before creating
 Before opening a new project/board/workflow in Jira, present a short summary:
 - Proposed project name
 - List of statuses/stages
 - List of roles (personas) that will appear on the board
 Then ask explicit approval: "לאשר יצירה עם המבנה הזה?" Only after approval → proceed to technical execution.
 
-## Step 5 — Technical execution in Jira
+## Step 6 — Technical execution in Jira
 - Use the **`jira-cloud-boards`** skill for creating boards/workflows/statuses, INCLUDING the critical `location` parameter (learned from broken boards 34/101 — always ensure a valid location before finishing).
 - Use the **`jira-cloud-api`** skill for general operations (projects, schemes, assignments).
-- Use `scripts/setup_team_board.py` (from jira-cloud-boards) as the base, and adapt the status/workflow parameters to what was agreed with the user in Step 4.
+- Use `scripts/setup_team_board.py` (from jira-cloud-boards) as the base, and adapt the status/workflow parameters to what was agreed with the user in Step 5.
 - After creating the board, **split the columns automatically** (no manual step) using `scripts/set_columns.py <boardId> "ColName:StatusId" ...` from jira-cloud-boards — this uses the undocumented greenhopper API and verifies via re-GET.
 - At the end verify: the board renders correctly, has a valid `location`, and ALL agreed statuses appear as their own columns.
 
-## Step 6 — Completion report
+## Step 7 — Completion report
 At the end report to the user:
 - Direct link to the new board
 - List of created statuses
