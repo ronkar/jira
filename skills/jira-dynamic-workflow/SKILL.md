@@ -74,21 +74,51 @@ The agent used to create a brand-new project+board for every request, even small
 GOLDEN RULE: never decide between "use existing" vs "create new" yourself when a reasonable match
 exists — always ask the user. You may recommend, but the user decides.
 
-## Step 5 — Approval before creating
+## Step 5 — Planning: focused clarifying questions BEFORE creating the issue
+The agent used to jump straight to creating an issue with just a title (e.g. "Investigate RabbitMQ
+issue") without gathering the details actually needed to work the task. FIX: after the board decision
+(existing OR new), and BEFORE the API call that creates the issue, run a focused Planning step.
+This is MANDATORY, even when the task looks "simple".
+
+**How to ask — not a long interrogation:**
+- 3-5 focused questions per task type (see table below), not a generic laundry list.
+- Ask 1-2 questions per turn, not all at once if it feels like a form.
+- If the user already gave some info in the original request — do NOT re-ask; only fill the gaps.
+- If the user answers "don't know"/"check yourself" — it's fine to proceed without it and mark it
+  **TBD** in the issue description; don't block the process.
+
+**Domain → Planning questions:**
+| Domain | Key questions before creating the issue |
+|--------|------------------------------------------|
+| Incident / investigation | Which servers/services affected? What exactly is the symptom (error, lag, crash)? When did it start? Impact severity (fully down / limited / cosmetic)? Are logs/metrics available? Any suspected cause (recent deploy, config change)? |
+| Feature / software dev | Language/stack? Exact scope (in/out)? Acceptance criteria? Dependencies on other systems/teams? Deadline? |
+| Data analysis | Data source? Business question to answer? Relevant time range? Desired output format (report, dashboard, number)? |
+| Maintenance / DevOps | Which system/service? One-off or recurring (cron)? Allowed maintenance window? Risk of downtime? |
+| Unknown domain | First ask "what exactly is the end goal?" then derive 2-3 follow-up questions (who's involved, input/output, what defines success). |
+
+**What to do with the answers:**
+- Put ALL answers into the issue **description** in a structured, readable way (not just the title),
+  so anyone opening the issue understands the full context without going back to the agent.
+- If the project has relevant custom fields (e.g. "affected server", "component") — map answers to
+  those fields instead of free text when possible.
+- If some answers affect the chosen persona/workflow itself (e.g. "this isn't just Kafka, it's a
+  cross-service failure") — re-confirm with the user that the chosen board still fits, BEFORE creating the issue.
+
+## Step 6 — Approval before creating
 Before opening a new project/board/workflow in Jira, present a short summary:
 - Proposed project name
 - List of statuses/stages
 - List of roles (personas) that will appear on the board
 Then ask explicit approval: "לאשר יצירה עם המבנה הזה?" Only after approval → proceed to technical execution.
 
-## Step 6 — Technical execution in Jira
+## Step 7 — Technical execution in Jira
 - Use the **`jira-cloud-boards`** skill for creating boards/workflows/statuses, INCLUDING the critical `location` parameter (learned from broken boards 34/101 — always ensure a valid location before finishing).
 - Use the **`jira-cloud-api`** skill for general operations (projects, schemes, assignments).
 - Use `scripts/setup_team_board.py` (from jira-cloud-boards) as the base, and adapt the status/workflow parameters to what was agreed with the user in Step 5.
 - After creating the board, **split the columns automatically** (no manual step) using `scripts/set_columns.py <boardId> "ColName:StatusId" ...` from jira-cloud-boards — this uses the undocumented greenhopper API and verifies via re-GET.
 - At the end verify: the board renders correctly, has a valid `location`, and ALL agreed statuses appear as their own columns.
 
-## Step 7 — Completion report
+## Step 8 — Completion report
 At the end report to the user:
 - Direct link to the new board
 - List of created statuses
