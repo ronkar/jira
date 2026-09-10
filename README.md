@@ -15,6 +15,7 @@ create dynamic projects / boards / workflows / columns without re-discovering th
 |-------|---------|
 | `skills/jira-cloud-boards/` | Create boards/workflows/statuses via API + **split columns** via the undocumented greenhopper API. |
 | `skills/jira-dynamic-workflow/` | The **agent role**: analyze a business need → propose workflow → get approval → execute → report. |
+| `skills/hermes-board-manager/` | **Runtime role**: manage all active issues on one board, coordinate executor agents, escalate to Hermes. |
 | `skills/jira-cloud-api/` | General Jira Cloud REST automation (projects, statuses, workflows, issues). |
 
 ---
